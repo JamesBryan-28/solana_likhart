@@ -1,0 +1,25 @@
+{
+  "name": "Be Rare Duck",
+  "description": "Be Rare in a world full  of fools",
+  "image": "https://quicknode.myfilebase.com/ipfs/QmRj8uAk7L9WCgdsRZmbd579QuWcXXtLfyUpcRP6abP2ni",
+  "external_url": "https://example.com",
+  "attributes": [
+    {
+      "trait_type": "trait1",
+      "value": "value1"
+    },
+    {
+      "trait_type": "trait2",
+      "value": "value2"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ipfs://QmRj8uAk7L9WCgdsRZmbd579QuWcXXtLfyUpcRP6abP2ni",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}
