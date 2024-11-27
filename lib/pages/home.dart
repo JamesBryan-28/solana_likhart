@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -21,14 +22,9 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _balance;
   SolanaClient? client;
   final storage = const FlutterSecureStorage();
-  bool _mintNftExpanded = false;
-  final _cidController = TextEditingController();
-  final _nameController = TextEditingController();
-  final _symbolController = TextEditingController();
   String CID = '';
   String name = '';
   String symbol = '';
-  bool _fetchNFT = false;
   bool newFetch = false;
 
   bool _showNftExpanded = false;
@@ -43,6 +39,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Wallet'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              GoRouter.of(context).go("/config");
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
@@ -111,85 +115,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     const Text('Mint NFT'),
                     IconButton(
-                      icon: Icon(_mintNftExpanded
-                          ? Icons.expand_less
-                          : Icons.expand_more),
+                      icon: const Icon(Icons.arrow_forward),
                       onPressed: () {
-                        setState(() {
-                          _cidController.clear();
-                          _mintNftExpanded = !_mintNftExpanded;
-                          _showNftExpanded = false;
-                        });
+                        GoRouter.of(context).go('/createNft', extra: client);
                       },
                     )
                   ],
                 ),
               ),
             ),
-            if (_mintNftExpanded)
-              Container(
-                  height: 200,
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                            width: 250,
-                            child: TextField(
-                              controller: _nameController,
-                              decoration: const InputDecoration(
-                                  labelStyle: TextStyle(fontSize: 12),
-                                  labelText: 'Name of the NFT'),
-                            )),
-                        Container(
-                            width: 250,
-                            child: TextField(
-                              controller: _symbolController,
-                              decoration: const InputDecoration(
-                                  labelStyle: TextStyle(fontSize: 12),
-                                  labelText: 'Symbol for the NFT'),
-                            )),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                                width: 250,
-                                child: TextField(
-                                  controller: _cidController,
-                                  decoration: const InputDecoration(
-                                      labelStyle: TextStyle(fontSize: 12),
-                                      labelText:
-                                      'Enter a valid QuickNode IPFS Json CID'),
-                                )),
-                            IconButton(
-                              icon: const Icon(Icons.send),
-                              onPressed: () {
-                                CID = _cidController.text;
-                                name = _nameController.text;
-                                symbol = _symbolController.text;
-                                setState(() {
-                                  _fetchNFT = true;
-                                });
-                                newFetch = true;
-                              },
-                            )
-                          ],
-                        ),
-                      ])),
-            if (_fetchNFT && _mintNftExpanded)
-              FutureBuilder<String>(
-                  future: _createNFT(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    }
-
-                    return Text(snapshot.data!);
-                  }),
             Card(
               child: Padding(
                 padding: EdgeInsets.all(8),
@@ -285,14 +219,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<String> _createNFT() async {
-    if (newFetch) {
-      newFetch = false;
-      return await createNft(client!, CID, name, symbol);
-    }
-    return "";
-  }
-
   void _readPk() async {
     final mnemonic = await storage.read(key: 'mnemonic');
     if (mnemonic != null) {
@@ -305,12 +231,24 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _initializeClient() async {
-    await dotenv.load(fileName: ".env");
+    String? rpcUrl;
+    final network = await storage.read(key: "network");
+    if (network == null || network == "") {
+      await storage.write(key: 'network', value: "mainnet");
+      rpcUrl = "https://api.mainnet-beta.solana.com";
+      await storage.write(key: 'mainnetRpc', value: rpcUrl);
+    } else if (network == "mainnet") {
+      rpcUrl = await storage.read(key: "mainnetRpc");
+    } else if (network == "devnet") {
+      rpcUrl = await storage.read(key: "devnetRpc");
+    }
 
+    String wsUrl = rpcUrl!.replaceFirst('https', 'wss');
     client = SolanaClient(
-      rpcUrl: Uri.parse(dotenv.env['QUICKNODE_RPC_URL'].toString()),
-      websocketUrl: Uri.parse(dotenv.env['QUICKNODE_RPC_WSS'].toString()),
+      rpcUrl: Uri.parse(rpcUrl),
+      websocketUrl: Uri.parse(wsUrl),
     );
+
     _getBalance();
   }
 

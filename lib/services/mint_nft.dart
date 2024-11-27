@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:math';
 import 'package:solana/solana.dart' as solana;
 import 'package:solana/anchor.dart' as solana_anchor;
 import 'package:solana/encoder.dart' as solana_encoder;
-import 'package:solana_common/utils/buffer.dart' as solana_buffer;
+import 'package:solana_buffer/buffer.dart'as solana_buffer;
+//import 'package:solana_common/utils/buffer.dart' as solana_buffer;
 import '../anchor_types/nft_parameters.dart' as anchor_types;
+
 
 Future<String> createNft(
     solana.SolanaClient client, String CID, String name, String symbol) async {
@@ -23,12 +25,21 @@ Future<String> createNft(
 
   int id = Random().nextInt(999999999);
 
+
   final nftMintPda = await solana.Ed25519HDPublicKey.findProgramAddress(
       programId: programIdPublicKey,
       seeds: [
         solana_buffer.Buffer.fromString("mint"),
         solana_buffer.Buffer.fromInt64(id),
       ]);
+
+/*  final nftMintPda = await solana.Ed25519HDPublicKey.findProgramAddress(
+      programId: programIdPublicKey,
+      seeds: [
+        BufferHelper.fromString("mint"),
+        BufferHelper.fromInt64(id),
+      ]);*/
+
 
   final ataProgramId = solana.Ed25519HDPublicKey.fromBase58(
       solana.AssociatedTokenAccountProgram.programId);
@@ -54,6 +65,7 @@ Future<String> createNft(
     programId: ataProgramId,
   );
 
+
   final masterEditionAccountPda =
   await solana.Ed25519HDPublicKey.findProgramAddress(
     seeds: [
@@ -72,6 +84,26 @@ Future<String> createNft(
     ],
     programId: metaplexProgramIdPublicKey,
   );
+
+/*  final masterEditionAccountPda =
+  await solana.Ed25519HDPublicKey.findProgramAddress(
+    seeds: [
+      BufferHelper.fromString("metadata"),
+      metaplexProgramIdPublicKey.bytes,
+      nftMintPda.bytes,
+      BufferHelper.fromString("edition"),
+    ],
+    programId: metaplexProgramIdPublicKey,
+  );
+
+  final nftMetadataPda = await solana.Ed25519HDPublicKey.findProgramAddress(
+    seeds: [
+      BufferHelper.fromString("metadata"),
+      metaplexProgramIdPublicKey.bytes,
+      nftMintPda.bytes,
+    ],
+    programId: metaplexProgramIdPublicKey,
+  );*/
 
   final instructions = [
     await solana_anchor.AnchorInstruction.forMethod(

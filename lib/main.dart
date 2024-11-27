@@ -1,6 +1,9 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:solana/solana.dart';
+import 'package:solana_likhart/pages/config.dart';
+import 'package:solana_likhart/pages/create_nft.dart';
 import 'package:solana_likhart/pages/generatePhrase.dart';
 import 'package:solana_likhart/pages/home.dart';
 import 'package:solana_likhart/pages/inputPhrase.dart';
@@ -43,6 +46,17 @@ final GoRouter _router = GoRouter(routes: <GoRoute>[
       path: '/home',
       builder: (context, state) {
         return const HomeScreen();
+      }),
+  GoRoute(
+      path: '/createNft',
+      builder: (context, state) {
+        SolanaClient client = state.extra as SolanaClient;
+        return CreateNftPage(client: client);
+      }),
+  GoRoute(
+      path: '/config',
+      builder: (context, state) {
+        return const ConfigPage();
       }),
 ]);
 

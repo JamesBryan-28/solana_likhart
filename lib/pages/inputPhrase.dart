@@ -20,10 +20,9 @@ class _InputPhraseScreenState extends State<InputPhraseScreen> {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-
-          const SizedBox(height: 150),
           const Text('Please enter your recovery phrase',
-              style: TextStyle(fontSize: 18,height: 10)),
+              style: TextStyle(fontSize: 18)),
+          const SizedBox(height: 32),
           Center(
             child: Form(
               key: _formKey,
@@ -55,7 +54,6 @@ class _InputPhraseScreenState extends State<InputPhraseScreen> {
                   )),
             ),
           ),
-
           Text(validationFailed ? 'Invalid keyphrase' : '',
               style: TextStyle(color: Colors.red)),
           Spacer(),
